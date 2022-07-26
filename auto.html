@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<!--
+	Massively by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+  <head>
+    <title>Edward Kang - Auto Indexer</title>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, user-scalable=no"
+    />
+    <link rel="stylesheet" href="assets/css/main.css" />
+    <noscript
+      ><link rel="stylesheet" href="assets/css/noscript.css"
+    /></noscript>
+  </head>
+  <body class="is-preload">
+    <!-- Wrapper -->
+    <div id="wrapper">
+      <!-- Header -->
+      <header id="header">
+        <a href="index.html" class="logo">Main Site</a>
+      </header>
+
+      <!-- Nav -->
+      <nav id="nav">
+        <ul class="links">
+          <li><a href="index.html">Main</a></li>
+          <li class="active"><a href="generic.html">projects</a></li>
+          <li><a href="elements.html">about me</a></li>
+        </ul>
+      </nav>
+
+      <!-- Main -->
+      <div id="main">
+        <!-- Post -->
+        <section class="post">
+          <header class="major">
+            <h1>Automatic Indexer</h1>
+            <p>An Independent Project Designed to Index Words in a PDF</p>
+          </header>
+          <div class="custom-flex">
+            <iframe
+              width="641"
+              height="361"
+              src="https://www.youtube.com/embed/x9LbJkiIcTg"
+              title="YouTube video player"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+            ></iframe>
+          </div>
+          <p>
+            I was first inspired to create this project when I found the work in
+            my yearbook class to be too tedious. In order to index the names in
+            the book, the members had to manually search for the names and write
+            down the page number they were on. I believed that there would be a
+            more efficient method without having 10 people work after school for
+            2 weeks indexing.
+          </p>
+          <p>
+            The script is quite intuitive. A user first inputs the roster in a
+            google sheet on separate columns with "Names" and "Raw Names." This
+            is because sometimes the names in the yearbook come out in different
+            formats. Then the user chooses the PDF that they would like to
+            index. When the script is run, it first extracts all the text in the
+            PDF and reformats the text so that the program can scrub through
+            more efficiently. The program then goes through the names in the
+            Google Sheets and matches the names with the ones on the PDF, then
+            prints out the page numbers on the right side of the Google Sheets.
+            For a total of 500 students in the roster, the program took
+            approximately 18 minutes to complete. This is much more efficient
+            than 10 people manually doing the indexing.
+          </p>
+
+          <div>
+            <h2>Code</h2>
+            <pre><code>
+from __future__ import print_function
+import PySimpleGUI as sg
+import os.path
+from PyPDF2 import PdfFileReader, PdfFileWriter
+from pathlib import Path
+import re
+import PyPDF2
+
+from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
+from google.oauth2 import service_account
+
+SERVICE_ACCOUNT_FILE = 'keys.json'
+SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
+creds = None
+creds = service_account.Credentials.from_service_account_file(
+        SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+
+# The ID and range of a sample spreadsheet.
+SAMPLE_SPREADSHEET_ID = '1DQyjh1-8TEFKUqqSi9b-TNcjsCtnCspWiMbv3t2mJeM'
+
+service = build('sheets', 'v4', credentials=creds)
+
+# Call the Sheets API
+sheet = service.spreadsheets()
+result = sheet.values().get(spreadsheetId=SAMPLE_SPREADSHEET_ID,
+                            range="Sheet1!B1:B508").execute()
+result2 = sheet.values().get(spreadsheetId=SAMPLE_SPREADSHEET_ID,
+                            range="Sheet1!A1:A508").execute()
+values = result.get('values')
+values2 = result2.get('values')
+
+name = []
+nameraw = []
+for x in values:
+        for i in x:
+                name.append(i)
+
+for x in values2:
+        for i in x:
+                nameraw.append(i)
+
+sg.theme("DarkTeal2")
+layout = [[sg.T("")], [sg.Text("Choose a file: "), sg.Input(), sg.FileBrowse(key="-IN-")],[sg.Button("RUN")]]
+
+###Building Window
+window = sg.Window('My File Browser', layout, size=(600,150))
+
+def indexer (file_path):
+    pdf = PdfFileReader(file_path)
+    pagesfinal = [[]]
+    for i in range(len(name)):
+            print(nameraw[i])
+            pagesfinal.append([])
+            for page_num in range (pdf.numPages):    
+                pageobj = pdf.getPage(page_num)
+                pageinfo = pageobj.extractText()
+                pageinfo = ''.join(pageinfo.split())
+                name[i]= ''.join(str(name[i]).split())
+                nameraw[i] = ''.join(str(nameraw[i]).split())
+                if (re.search(name[i], pageinfo)) or (re.search(nameraw[i], pageinfo)) or (re.search(name[i].upper(), pageinfo)):
+                        pagesfinal[i].append(page_num +1)
+                        print(pagesfinal[i])
+        
+            request = sheet.values().update(spreadsheetId=SAMPLE_SPREADSHEET_ID, range="Sheet1!C1", valueInputOption = "USER_ENTERED", body={"values":pagesfinal}).execute()
+        
+
+while True:
+    event, values = window.read()
+    if event == sg.WIN_CLOSED or event=="Exit":
+        break
+    elif event == "RUN":
+        indexer(values["-IN-"])
+
+
+							
+									</code></pre>
+          </div>
+          <div class = "custom-flex-2" style = "margin-bottom:5px;">
+            <video controls mute style = "height:auto; width:100%;">
+              <source src="autoindexpreview.mov" type="video/mov">
+            </video>
+            <iframe
+              style = "height:auto; width:100%;"
+              src="https://www.youtube.com/embed/x9LbJkiIcTg"
+              title="YouTube video player"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+            ></iframe>
+          </div>
+          <div>
+            <p class = "custom-flex">
+              <strong>Visual Demonstrations</strong>
+            </p>
+
+          </div>
+
+        </section>
+      </div>
+
+      <!-- Footer -->
+      <footer id="footer">
+        <section>
+          <form method="post" action="#">
+            <div class="fields">
+              <div class="field">
+                <label for="name">Name</label>
+                <input type="text" name="name" id="name" />
+              </div>
+              <div class="field">
+                <label for="email">Email</label>
+                <input type="text" name="email" id="email" />
+              </div>
+              <div class="field">
+                <label for="message">Message</label>
+                <textarea name="message" id="message" rows="3"></textarea>
+              </div>
+            </div>
+            <ul class="actions">
+              <li><input type="submit" value="Send Message" /></li>
+            </ul>
+          </form>
+        </section>
+        <section class="split contact">
+          <section class="alt">
+            <h3>Address</h3>
+            <p>
+              1234 Somewhere Road #87257<br />
+              Nashville, TN 00000-0000
+            </p>
+          </section>
+          <section>
+            <h3>Phone</h3>
+            <p><a href="#">(000) 000-0000</a></p>
+          </section>
+          <section>
+            <h3>Email</h3>
+            <p><a href="#">info@untitled.tld</a></p>
+          </section>
+          <section>
+            <h3>Social</h3>
+            <ul class="icons alt">
+              <li>
+                <a href="#" class="icon brands alt fa-twitter"
+                  ><span class="label">Twitter</span></a
+                >
+              </li>
+              <li>
+                <a href="#" class="icon brands alt fa-facebook-f"
+                  ><span class="label">Facebook</span></a
+                >
+              </li>
+              <li>
+                <a href="#" class="icon brands alt fa-instagram"
+                  ><span class="label">Instagram</span></a
+                >
+              </li>
+              <li>
+                <a href="#" class="icon brands alt fa-github"
+                  ><span class="label">GitHub</span></a
+                >
+              </li>
+            </ul>
+          </section>
+        </section>
+      </footer>
+
+      <!-- Copyright -->
+      <div id="copyright">
+        <ul>
+          <li>&copy; Untitled</li>
+          <li>Design: <a href="https://html5up.net">HTML5 UP</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="assets/js/jquery.min.js"></script>
+    <script src="assets/js/jquery.scrollex.min.js"></script>
+    <script src="assets/js/jquery.scrolly.min.js"></script>
+    <script src="assets/js/browser.min.js"></script>
+    <script src="assets/js/breakpoints.min.js"></script>
+    <script src="assets/js/util.js"></script>
+    <script src="assets/js/main.js"></script>
+  </body>
+</html>
