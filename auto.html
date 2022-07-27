@@ -124,7 +124,8 @@ for x in values2:
                 nameraw.append(i)
 
 sg.theme("DarkTeal2")
-layout = [[sg.T("")], [sg.Text("Choose a file: "), sg.Input(), sg.FileBrowse(key="-IN-")],[sg.Button("RUN")]]
+layout = [[sg.T("")], [sg.Text("Choose a file: "), sg.Input(), 
+sg.FileBrowse(key="-IN-")],[sg.Button("RUN")]]
 
 ###Building Window
 window = sg.Window('My File Browser', layout, size=(600,150))
@@ -141,11 +142,14 @@ def indexer (file_path):
                 pageinfo = ''.join(pageinfo.split())
                 name[i]= ''.join(str(name[i]).split())
                 nameraw[i] = ''.join(str(nameraw[i]).split())
-                if (re.search(name[i], pageinfo)) or (re.search(nameraw[i], pageinfo)) or (re.search(name[i].upper(), pageinfo)):
+                if (re.search(name[i], pageinfo)) or (re.search(nameraw[i], pageinfo)) 
+                or (re.search(name[i].upper(), pageinfo)):
                         pagesfinal[i].append(page_num +1)
                         print(pagesfinal[i])
         
-            request = sheet.values().update(spreadsheetId=SAMPLE_SPREADSHEET_ID, range="Sheet1!C1", valueInputOption = "USER_ENTERED", body={"values":pagesfinal}).execute()
+            request = sheet.values().update(spreadsheetId=SAMPLE_SPREADSHEET_ID, 
+            range="Sheet1!C1", valueInputOption = "USER_ENTERED", 
+            body={"values":pagesfinal}).execute()
         
 
 while True:
@@ -160,8 +164,8 @@ while True:
 									</code></pre>
           </div>
           <div class = "custom-flex-2" style = "margin-bottom:5px;">
-            <video controls mute style = "height:auto; width:100%;">
-              <source src="autoindexpreview.mov" type="video/mov">
+            <video controls autoplay style = "height:auto; width:50%;">
+              <source src="images/autoindexpreview.mp4" type="video/mp4">
             </video>
             <iframe
               style = "height:auto; width:100%;"
@@ -207,19 +211,18 @@ while True:
         </section>
         <section class="split contact">
           <section class="alt">
-            <h3>Address</h3>
+            <h3>Location</h3>
             <p>
-              1234 Somewhere Road #87257<br />
-              Nashville, TN 00000-0000
+              South Korea
             </p>
           </section>
           <section>
             <h3>Phone</h3>
-            <p><a href="#">(000) 000-0000</a></p>
+            <p><a href="#">(010) 6307-7705</a></p>
           </section>
           <section>
             <h3>Email</h3>
-            <p><a href="#">info@untitled.tld</a></p>
+            <p><a href="#">ekang23@student.kis.or.kr</a></p>
           </section>
           <section>
             <h3>Social</h3>
@@ -238,15 +241,6 @@ while True:
           </section>
         </section>
       </footer>
-
-      <!-- Copyright -->
-      <div id="copyright">
-        <ul>
-          <li>&copy; Untitled</li>
-          <li>Design: <a href="https://html5up.net">HTML5 UP</a></li>
-        </ul>
-      </div>
-    </div>
 
     <!-- Scripts -->
     <script src="assets/js/jquery.min.js"></script>
